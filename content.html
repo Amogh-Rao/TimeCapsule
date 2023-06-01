@@ -64,52 +64,37 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script>
-        // Get the query parameter from the URL
-        function getQueryParam(param) {
-            var urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
-        }
-
-        // Generate a random and unique ID
-        function generateUniqueId() {
-            return Math.random().toString(36).substr(2, 9);
-        }
-
-        // Generate a unique URL for the time capsule content
-        var timeCapsuleId = getQueryParam("id");
-        if (!timeCapsuleId) {
-            timeCapsuleId = generateUniqueId();
-            var currentUrl = window.location.origin + window.location.pathname;
-            window.history.replaceState({}, document.title, currentUrl + "?id=" + timeCapsuleId);
-        }
-        var uniqueUrl = window.location.href;
+        var params = new URLSearchParams(window.location.search);
+        var timeCapsuleId = params.get("id");
 
         var timeCapsuleData = JSON.parse(localStorage.getItem(timeCapsuleId));
         if (timeCapsuleData) {
-            var currentDateTime = new Date();
-            var storedDateTime = new Date(timeCapsuleData.dateTime);
+            var currentDateTime = moment();
+            var storedDateTime = moment(timeCapsuleData.dateTime);
 
             if (currentDateTime >= storedDateTime) {
                 document.getElementById("content").textContent = timeCapsuleData.content;
             } else {
-                var displayDateTime = moment(storedDateTime).format("MMMM Do YYYY, h:mm:ss a");
+                var displayDateTime = storedDateTime.format("MMMM Do YYYY, h:mm:ss a");
                 document.getElementById("dateAvailability").textContent = "This time capsule will be available on " + displayDateTime;
 
                 var countdownElement = document.getElementById("countdown");
                 var countdownInterval = setInterval(function() {
-                    var currentDateTime = new Date();
+                    var currentDateTime = moment();
 
                     if (currentDateTime >= storedDateTime) {
                         clearInterval(countdownInterval);
                         countdownElement.innerHTML = "";
                         document.getElementById("content").textContent = timeCapsuleData.content;
                     } else {
-                        var remainingTime = storedDateTime - currentDateTime;
+                        var remainingTime = storedDateTime.diff(currentDateTime);
 
-                        var days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
-                        var hours = Math.floor((remainingTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                        var minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-                        var seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+                        var duration = moment.duration(remainingTime);
+
+                        var days = duration.days();
+                        var hours = duration.hours();
+                        var minutes = duration.minutes();
+                        var seconds = duration.seconds();
 
                         countdownElement.innerHTML = "Remaining time: " + days + " days, " + hours + " hours, " + minutes + " minutes, " + seconds + " seconds";
                     }
