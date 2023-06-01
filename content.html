@@ -3,7 +3,55 @@
 <head>
     <title>Time Capsule Content</title>
     <style>
-        /* CSS styles... */
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f2f2f2;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        #dateAvailability {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        #countdown {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .warning {
+            background-color: #FFF3CD;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #currentDateTime {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 12px;
+            color: #999;
+        }
     </style>
 </head>
 <body>
@@ -22,9 +70,19 @@
             return urlParams.get(param);
         }
 
+        // Generate a random and unique ID
+        function generateUniqueId() {
+            return Math.random().toString(36).substr(2, 9);
+        }
+
         // Generate a unique URL for the time capsule content
         var timeCapsuleId = getQueryParam("id");
-        var uniqueUrl = window.location.origin + window.location.pathname + "?id=" + timeCapsuleId;
+        if (!timeCapsuleId) {
+            timeCapsuleId = generateUniqueId();
+            var currentUrl = window.location.origin + window.location.pathname;
+            window.history.replaceState({}, document.title, currentUrl + "?id=" + timeCapsuleId);
+        }
+        var uniqueUrl = window.location.href;
 
         var timeCapsuleData = JSON.parse(localStorage.getItem(timeCapsuleId));
         if (timeCapsuleData) {
@@ -61,9 +119,12 @@
             document.getElementById("warningMessage").textContent = "No time capsule content available.";
         }
 
-        // Display unique URL
-        var uniqueUrlElement = document.getElementById("currentDateTime");
-        uniqueUrlElement.innerHTML = "Unique URL: <a href='" + uniqueUrl + "'>" + uniqueUrl + "</a>";
+        // Display current time and day
+        var currentDateTimeElement = document.getElementById("currentDateTime");
+        setInterval(function() {
+            var now = moment().format("YYYY-MM-DD HH:mm:ss");
+            currentDateTimeElement.textContent = "Current time: " + now;
+        }, 1000);
     </script>
 </body>
 </html>
